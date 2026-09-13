@@ -1,4 +1,4 @@
-// content.js — TL;DR Privacy Extension (Series A Startup Engine)
+// content.js — TL;DR Privacy Extension Engine
 // Injected into web pages to provide an interactive, shadow-DOM sliding panel & floating smart banner
 
 (function () {
@@ -107,7 +107,7 @@
   }
 
   // ===== CATEGORY EXTRACTION ENGINE =====
-  function extractCategories(clauses, verdict) {
+  function extractCategories(clauses, verdictText) {
     const categories = {
       selling: { title: 'Data Selling & Monetization', icon: '📦', risk: 'low', summary: 'No explicit data selling clauses found.' },
       ai: { title: 'AI Model Training', icon: '🧠', risk: 'low', summary: 'No AI training on user data declared.' },
@@ -116,37 +116,32 @@
       rights: { title: 'User Rights & Arbitration', icon: '⚖️', risk: 'low', summary: 'Standard legal terms and governing law.' }
     };
 
-    const text = (verdict + ' ' + clauses.map(c => c.title + ' ' + c.detail).join(' ')).toLowerCase();
+    const text = (verdictText + ' ' + clauses.map(c => c.title + ' ' + c.detail).join(' ')).toLowerCase();
 
-    // Data Selling
     if (text.includes('sell') || text.includes('monetiz') || text.includes('broker')) {
       const match = clauses.find(c => (c.title + c.detail).toLowerCase().includes('sell'));
       categories.selling.risk = match?.risk || 'high';
       categories.selling.summary = match?.detail || 'Policy permits sharing or monetizing user data with partners.';
     }
 
-    // AI Training
     if (text.includes('ai') || text.includes('artificial intelligence') || text.includes('train') || text.includes('machine learning') || text.includes('model')) {
       const match = clauses.find(c => (c.title + c.detail).toLowerCase().match(/ai|train|machine/));
       categories.ai.risk = match?.risk || 'medium';
       categories.ai.summary = match?.detail || 'User content may be used to develop or train AI models.';
     }
 
-    // Third-party sharing
     if (text.includes('third party') || text.includes('advertis') || text.includes('partner') || text.includes('affiliate')) {
       const match = clauses.find(c => (c.title + c.detail).toLowerCase().includes('third'));
       categories.sharing.risk = match?.risk || 'medium';
       categories.sharing.summary = match?.detail || 'Data is shared with third-party advertisers and service partners.';
     }
 
-    // Retention
     if (text.includes('retain') || text.includes('retention') || text.includes('delete') || text.includes('deletion') || text.includes('store')) {
       const match = clauses.find(c => (c.title + c.detail).toLowerCase().match(/retain|delete|store/));
       categories.retention.risk = match?.risk || 'medium';
       categories.retention.summary = match?.detail || 'Certain user data is retained even after account closure.';
     }
 
-    // User Rights / Arbitration
     if (text.includes('arbitration') || text.includes('dispute') || text.includes('class action') || text.includes('opt-out') || text.includes('court')) {
       const match = clauses.find(c => (c.title + c.detail).toLowerCase().match(/arbitrat|dispute|class/));
       categories.rights.risk = match?.risk || 'high';
@@ -164,7 +159,7 @@
 
   const shadow = hostEl.attachShadow({ mode: 'open' });
 
-  // CSS Styles inside Shadow DOM
+  // CSS Styles inside Shadow DOM — Fixed Dark Theme
   const styleEl = document.createElement('style');
   styleEl.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
@@ -176,24 +171,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
-    }
 
-    /* Dark Mode Defaults */
-    :host([data-theme="dark"]), .theme-dark {
-      --bg-app: #0B0D14;
-      --bg-surface: #121520;
-      --bg-card: #181C2B;
-      --bg-hover: #21263B;
-      --text-main: #F8FAFC;
-      --text-sub: #94A3B8;
-      --text-muted: #64748B;
-      --border-line: rgba(255, 255, 255, 0.08);
-      --border-glow: rgba(99, 102, 241, 0.3);
-      --shadow-drawer: -16px 0 48px rgba(0, 0, 0, 0.6);
-    }
-
-    /* Light Mode */
-    :host([data-theme="light"]), .theme-light {
       --bg-app: #F8FAFC;
       --bg-surface: #FFFFFF;
       --bg-card: #FFFFFF;
@@ -203,7 +181,7 @@
       --text-muted: #64748B;
       --border-line: #E2E8F0;
       --border-glow: rgba(79, 70, 229, 0.25);
-      --shadow-drawer: -12px 0 40px rgba(15, 23, 42, 0.15);
+      --shadow-drawer: -16px 0 48px rgba(15, 23, 42, 0.12);
     }
 
     /* Floating Top Smart Banner */
@@ -324,7 +302,7 @@
     }
 
     .hdr-brand { display: flex; align-items: center; gap: 9px; }
-    .hdr-mark { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, #6366F1, #4F46E5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
+    .hdr-mark { width: 32px; height: 32px; border-radius: 99px; background: linear-gradient(135deg, #6366F1, #4F46E5); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
     .hdr-title-group { display: flex; flex-direction: column; gap: 1px; }
     .hdr-name-row { display: flex; align-items: center; gap: 6px; }
     .hdr-name { font-size: 14px; font-weight: 800; color: var(--text-main); letter-spacing: -0.3px; }
@@ -340,7 +318,7 @@
     .hidden { display: none !important; }
 
     /* Buttons */
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 16px; border-radius: 9px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; width: 100%; font-family: 'Inter', sans-serif; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; width: 100%; font-family: 'Plus Jakarta Sans', sans-serif; }
     .btn-accent { background: linear-gradient(135deg, #6366F1, #4F46E5); color: white; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35); }
     .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99, 102, 241, 0.45); }
     .btn-muted { background: var(--bg-card); color: var(--text-sub); border: 1px solid var(--border-line); }
@@ -353,18 +331,18 @@
     .decode-line.short { width: 65%; }
     .decode-scanner { position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.4), transparent); animation: scanSweep 1.8s ease infinite; }
     @keyframes scanSweep { 0% { left: -40%; } 100% { left: 110%; } }
-    .decode-status { font-size: 12.5px; font-weight: 600; color: #818CF8; margin-bottom: 10px; }
+    .decode-status { font-size: 12.5px; font-weight: 600; color: #4F46E5; margin-bottom: 10px; }
     .decode-bar { height: 4px; background: var(--border-line); border-radius: 2px; overflow: hidden; }
     .decode-bar-fill { height: 100%; width: 15%; background: linear-gradient(90deg, #6366F1, #06B6D4); transition: width 0.4s ease; }
 
     /* Hero Privacy Meter */
-    .orb-hero { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border-line); border-radius: 14px; padding: 14px; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15); }
+    .orb-hero { display: flex; align-items: center; gap: 14px; background: var(--bg-card); border: 1px solid var(--border-line); border-radius: 14px; padding: 14px; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06); }
     .orb-wrap { position: relative; width: 74px; height: 74px; flex-shrink: 0; }
     .orb-rings { width: 100%; height: 100%; transform: rotate(-90deg); }
     .orb-ticks { fill: none; stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 4; opacity: 0.5; }
     .orb-outer { fill: none; stroke: var(--border-line); stroke-width: 1; }
     .orb-mid { fill: none; stroke: var(--border-line); stroke-width: 0.5; stroke-dasharray: 4 3; }
-    .orb-fill { fill: none; stroke: #6366F1; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 238.8; stroke-dashoffset: 238.8; transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s ease; filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.4)); }
+    .orb-fill { fill: none; stroke: #4F46E5; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 238.8; stroke-dashoffset: 238.8; transition: stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.4s ease; filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.3)); }
     .orb-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .orb-score { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
     .orb-max { font-size: 8.5px; color: var(--text-muted); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
@@ -372,20 +350,24 @@
     .orb-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .orb-grade { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; width: fit-content; }
 
-    .grade-dangerous { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .grade-concerning { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .grade-fair { background: rgba(59, 130, 246, 0.15); color: #3B82F6; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .grade-good { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .grade-dangerous { background: rgba(239, 68, 68, 0.15); color: #DC2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .grade-concerning { background: rgba(245, 158, 11, 0.15); color: #D97706; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .grade-fair { background: rgba(59, 130, 246, 0.15); color: #2563EB; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .grade-good { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
 
-    .briefing-box { background: var(--bg-surface); border-left: 3px solid #6366F1; border-radius: 0 6px 6px 0; padding: 7px 10px; margin-top: 2px; }
-    .briefing-tag { display: block; font-size: 7.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #818CF8; letter-spacing: 0.6px; margin-bottom: 3px; }
-    .orb-verdict { font-size: 11px; color: var(--text-sub); line-height: 1.4; }
+    .briefing-box { background: var(--bg-surface); border-left: 3px solid #4F46E5; border-radius: 0 6px 6px 0; padding: 8px 10px; margin-top: 2px; }
+    .briefing-tag { display: block; font-size: 8.5px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: #4F46E5; letter-spacing: 0.6px; margin-bottom: 4px; }
+    
+    /* 3 Concise Summary Bullets */
+    .verdict-bullets { display: flex; flex-direction: column; gap: 6px; list-style: none; padding: 0; margin: 0; }
+    .verdict-bullet-item { font-size: 12.5px; font-weight: 500; color: var(--text-sub); line-height: 1.45; position: relative; padding-left: 14px; }
+    .verdict-bullet-item::before { content: "•"; position: absolute; left: 0; color: #4F46E5; font-weight: 800; }
 
     /* Category Cards Grid */
     .cats-hdr { font-size: 10px; font-weight: 700; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.8px; margin-top: 4px; margin-bottom: 6px; }
     .cats-grid { display: flex; flex-direction: column; gap: 8px; }
 
-    .cat-card { background: var(--bg-card); border: 1px solid var(--border-line); border-radius: 10px; padding: 10px 12px; transition: all 0.2s ease; cursor: pointer; }
+    .cat-card { background: var(--bg-card); border: 1px solid var(--border-line); border-radius: 10px; padding: 10px 12px; transition: all 0.2s ease; }
     .cat-card:hover { border-color: var(--border-glow); background: var(--bg-hover); }
     .cat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
     .cat-title-group { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 650; color: var(--text-main); }
@@ -395,7 +377,7 @@
     .cat-badge.medium { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
     .cat-badge.low { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
 
-    .cat-summary { font-size: 10.5px; color: var(--text-sub); line-height: 1.4; }
+    .cat-summary { font-size: 11px; color: var(--text-sub); line-height: 1.4; }
 
     /* Findings / Breakdown */
     .findings-hdr { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; margin-bottom: 6px; }
@@ -426,7 +408,6 @@
 
   // HTML Template for Shadow DOM
   const wrapperEl = document.createElement('div');
-  wrapperEl.className = 'theme-dark';
   wrapperEl.innerHTML = `
     <!-- In-Page Floating Top Smart Banner -->
     <div id="tldr-banner">
@@ -455,13 +436,12 @@
           <div class="hdr-title-group">
             <div class="hdr-name-row">
               <span class="hdr-name">TL;DR Privacy</span>
-              <span class="hdr-v2-badge">SERIES A</span>
+              <span class="hdr-v2-badge">INTELLIGENCE</span>
             </div>
             <span id="hdrDomain" class="hdr-domain">domain.com</span>
           </div>
         </div>
         <div class="hdr-actions">
-          <button id="themeToggleBtn" class="hdr-btn" title="Toggle Light/Dark Theme">🌙</button>
           <button id="minimizeBtn" class="hdr-btn" title="Minimize slider">—</button>
           <button id="closeBtn" class="hdr-btn" title="Close slider">✕</button>
         </div>
@@ -473,7 +453,7 @@
         <div id="viewIdle" class="decode-box">
           <div style="font-size: 28px; margin-bottom: 8px;">🛡️</div>
           <div id="idleTitle" style="font-size: 13.5px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">Privacy Policy Detected</div>
-          <div id="idleSub" style="font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">Ready to decode and reveal privacy signals</div>
+          <div id="idleSub" style="font-size: 11px; color: var(--text-muted); margin-bottom: 16px;">Ready to decode privacy signals & 5 category pillars</div>
           <button id="startAnalyzeBtn" class="btn btn-accent">⚡ Decode Privacy Policy</button>
         </div>
 
@@ -507,8 +487,10 @@
             <div class="orb-meta">
               <span id="meterGrade" class="orb-grade grade-good">User-Friendly</span>
               <div class="briefing-box">
-                <span class="briefing-tag">AI INTELLIGENCE BRIEFING</span>
-                <p id="meterVerdict" class="orb-verdict">Analyzing document clauses…</p>
+                <span class="briefing-tag">3-BULLET PRIVACY SUMMARY</span>
+                <ul id="meterVerdict" class="verdict-bullets">
+                  <li class="verdict-bullet-item">Analyzing clauses…</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -560,7 +542,6 @@
   const pillBadgeEl = shadow.getElementById('pill-badge');
   const sliderEl = shadow.getElementById('tldr-slider');
   const hdrDomainEl = shadow.getElementById('hdrDomain');
-  const themeToggleBtn = shadow.getElementById('themeToggleBtn');
   const closeBtn = shadow.getElementById('closeBtn');
   const minimizeBtn = shadow.getElementById('minimizeBtn');
 
@@ -593,28 +574,8 @@
   let currentResults = null;
   let loadingInterval = null;
   let isOpen = false;
-  let isDarkMode = true;
 
   hdrDomainEl.textContent = getDomain(window.location.href);
-
-  // Theme Switcher
-  function toggleTheme() {
-    isDarkMode = !isDarkMode;
-    wrapperEl.className = isDarkMode ? 'theme-dark' : 'theme-light';
-    themeToggleBtn.textContent = isDarkMode ? '🌙' : '☀️';
-    chrome.storage.sync.set({ theme: isDarkMode ? 'dark' : 'light' });
-  }
-
-  themeToggleBtn.addEventListener('click', toggleTheme);
-
-  // Load saved theme preference
-  chrome.storage.sync.get('theme', (res) => {
-    if (res.theme === 'light') {
-      isDarkMode = false;
-      wrapperEl.className = 'theme-light';
-      themeToggleBtn.textContent = '☀️';
-    }
-  });
 
   function showView(targetView) {
     [viewIdle, viewLoading, viewResults, viewError].forEach(v => {
@@ -662,9 +623,9 @@
   }
 
   // Render Category Breakdown Cards
-  function renderCategories(clauses, verdict) {
+  function renderCategories(clauses, verdictText) {
     catsContainer.innerHTML = '';
-    const cats = extractCategories(clauses, verdict);
+    const cats = extractCategories(clauses, verdictText);
 
     cats.forEach(c => {
       const card = document.createElement('div');
@@ -683,6 +644,38 @@
         <div class="cat-summary">${escapeHtml(c.summary)}</div>
       `;
       catsContainer.appendChild(card);
+    });
+  }
+
+  // Render 3 Concise Summary Bullets
+  function renderVerdictBullets(verdictData) {
+    meterVerdict.innerHTML = '';
+    let bullets = [];
+
+    if (Array.isArray(verdictData)) {
+      bullets = verdictData.map(b => String(b).trim()).filter(Boolean);
+    } else if (typeof verdictData === 'string') {
+      bullets = verdictData
+        .split(/\r?\n|\. /)
+        .map(b => b.replace(/^[-•*]\s*/, '').trim())
+        .filter(Boolean);
+    }
+
+    if (bullets.length === 0) bullets = ['Summary unavailable for this document.'];
+
+    while (bullets.length < 3) {
+      if (bullets.length === 1) bullets.push('Review category risk breakdown below.');
+      else if (bullets.length === 2) bullets.push('Check user data rights and arbitration clauses.');
+    }
+
+    // Strictly cap at first 3 bullets, max 20 words each
+    bullets.slice(0, 3).forEach(bullet => {
+      const words = bullet.split(/\s+/);
+      const cleanText = words.length > 20 ? words.slice(0, 20).join(' ') + '…' : bullet;
+      const li = document.createElement('li');
+      li.className = 'verdict-bullet-item';
+      li.textContent = cleanText;
+      meterVerdict.appendChild(li);
     });
   }
 
@@ -709,10 +702,12 @@
 
     meterGrade.textContent = info.text;
     meterGrade.className = `orb-grade ${info.cls}`;
-    meterVerdict.textContent = data.verdict || 'Analysis complete.';
 
-    // 5 Category Cards
-    renderCategories(data.clauses || [], data.verdict || '');
+    // Render strictly 3 concise summary bullets
+    renderVerdictBullets(data.verdict);
+
+    const verdictTextStr = Array.isArray(data.verdict) ? data.verdict.join(' ') : (data.verdict || '');
+    renderCategories(data.clauses || [], verdictTextStr);
 
     // Detailed Findings
     findingsContainer.innerHTML = '';
@@ -744,9 +739,32 @@
     pillBadgeEl.classList.remove('hidden');
   }
 
-  // Run AI Analysis
-  async function runAnalysis() {
+  // Run AI Analysis with Content-Hash Caching for 100% Score Determinism
+  async function runAnalysis(forceFresh = false) {
     openSlider();
+
+    const extracted = extractPageText();
+    if (extracted.text.length < 100) {
+      errorText.textContent = 'Not enough text found to analyze on this page.';
+      showView(viewError);
+      return;
+    }
+
+    const pageKey = getPageKey(window.location.href);
+    const contentHash = simpleHash(extracted.text);
+
+    // Check Content Hash Cache first to avoid score drift on re-analyze
+    if (!forceFresh) {
+      const dataStore = await chrome.storage.local.get('tldr_analyses');
+      const history = dataStore.tldr_analyses || {};
+      const cached = history[pageKey];
+
+      if (cached && cached.contentHash === contentHash && cached.score !== undefined) {
+        renderResults(cached);
+        return;
+      }
+    }
+
     showView(viewLoading);
     startScannerAnimation();
 
@@ -757,14 +775,6 @@
       if (!apiKey) {
         stopScannerAnimation();
         errorText.textContent = 'Please configure your API key in extension settings.';
-        showView(viewError);
-        return;
-      }
-
-      const extracted = extractPageText();
-      if (extracted.text.length < 100) {
-        stopScannerAnimation();
-        errorText.textContent = 'Not enough text found to analyze on this page.';
         showView(viewError);
         return;
       }
@@ -783,9 +793,7 @@
         throw new Error(res?.error || 'Analysis failed. Please try again.');
       }
 
-      const pageKey = getPageKey(window.location.href);
-      const contentHash = simpleHash(extracted.text);
-
+      // Save to cache
       const dataStore = await chrome.storage.local.get('tldr_analyses');
       const history = dataStore.tldr_analyses || {};
       history[pageKey] = {
@@ -814,7 +822,8 @@
   function copySummary() {
     if (!currentResults) return;
     const labels = { high: '🔴 HIGH', medium: '🟠 MEDIUM', low: '🟢 LOW' };
-    let text = `TL;DR Privacy Analysis (${getDomain(window.location.href)})\nPrivacy Score: ${currentResults.score}/100\n${currentResults.verdict}\n\n`;
+    const verdictText = Array.isArray(currentResults.verdict) ? currentResults.verdict.join('\n• ') : currentResults.verdict;
+    let text = `TL;DR Privacy Analysis (${getDomain(window.location.href)})\nPrivacy Score: ${currentResults.score}/100\n\n• ${verdictText}\n\n`;
     (currentResults.clauses || []).forEach(c => {
       text += `${labels[c.risk] || c.risk} — ${c.title}\n${c.detail}\n\n`;
     });
@@ -830,13 +839,12 @@
     });
   }
 
-  // Initial Check & In-Page Smart Banner
+  // Initial Check
   async function checkCachedAnalysis() {
     const pageKey = getPageKey(window.location.href);
     const dataStore = await chrome.storage.local.get('tldr_analyses');
     const history = dataStore.tldr_analyses || {};
     const saved = history[pageKey];
-
     const isLegal = isPrivacyPage();
 
     if (saved && saved.score !== undefined) {
@@ -850,7 +858,6 @@
         idleTitle.textContent = 'Privacy Policy Detected';
         idleSub.textContent = 'Ready to decode privacy signals & 5 category pillars';
 
-        // Check if banner preference enabled
         chrome.storage.sync.get({ showBanner: true }, (res) => {
           if (res.showBanner) {
             bannerText.textContent = `Privacy Policy Detected on ${getDomain(window.location.href)}`;
@@ -870,12 +877,12 @@
   closeBtn.addEventListener('click', closeSlider);
   minimizeBtn.addEventListener('click', closeSlider);
 
-  bannerOpenBtn?.addEventListener('click', () => { runAnalysis(); });
+  bannerOpenBtn?.addEventListener('click', () => { runAnalysis(false); });
   bannerCloseBtn?.addEventListener('click', () => { bannerEl.classList.remove('visible'); });
 
-  startAnalyzeBtn.addEventListener('click', runAnalysis);
-  reanalyzeSliderBtn.addEventListener('click', runAnalysis);
-  retrySliderBtn.addEventListener('click', runAnalysis);
+  startAnalyzeBtn.addEventListener('click', () => runAnalysis(false));
+  reanalyzeSliderBtn.addEventListener('click', () => runAnalysis(true));
+  retrySliderBtn.addEventListener('click', () => runAnalysis(true));
   copySummaryBtn.addEventListener('click', copySummary);
 
   // Runtime message handlers
@@ -900,7 +907,7 @@
       if (message.forceOpen) {
         openSlider();
         if (message.startAnalysis) {
-          runAnalysis();
+          runAnalysis(false);
         }
       } else {
         toggleSlider();

@@ -1,4 +1,4 @@
-// popup.js — TL;DR Privacy Extension (Series A Launcher Controller)
+// popup.js — TL;DR Privacy Extension (Launcher Controller)
 
 const screens = {
   noKey: document.getElementById('screenNoKey'),
@@ -8,7 +8,6 @@ const screens = {
 
 const el = {
   headerDomain: document.getElementById('headerDomain'),
-  themeToggleBtn: document.getElementById('themeToggleBtn'),
   settingsBtn: document.getElementById('settingsBtn'),
   historyBtn: document.getElementById('historyBtn'),
   goToSettingsBtn: document.getElementById('goToSettingsBtn'),
@@ -33,26 +32,6 @@ const el = {
 };
 
 let currentTab = null;
-let isDarkMode = true;
-
-// Theme Switcher
-function setTheme(theme) {
-  isDarkMode = theme === 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  if (el.themeToggleBtn) el.themeToggleBtn.textContent = isDarkMode ? '🌙' : '☀️';
-  chrome.storage.sync.set({ theme });
-}
-
-if (el.themeToggleBtn) {
-  el.themeToggleBtn.addEventListener('click', () => {
-    setTheme(isDarkMode ? 'light' : 'dark');
-  });
-}
-
-// Load saved theme
-chrome.storage.sync.get('theme', (res) => {
-  if (res.theme) setTheme(res.theme);
-});
 
 function showScreen(name) {
   Object.entries(screens).forEach(([k, v]) => {
@@ -226,7 +205,7 @@ async function showHistory() {
     if (el.histFooter) el.histFooter.classList.add('hidden');
   } else {
     if (el.histEmpty) el.histEmpty.classList.add('hidden');
-    if (el.histList) el.histList.classList.remove('hidden');
+    if (el.histList) el.histList.remove('hidden');
     if (el.histFooter) el.histFooter.classList.remove('hidden');
 
     entries.forEach((entry) => {

@@ -1,8 +1,6 @@
-// options.js — TL;DR Privacy Extension (Series A Settings Controller)
+// options.js — TL;DR Privacy Extension (Settings Controller)
 
 const el = {
-  themeToggleBtn: document.getElementById('themeToggleBtn'),
-  themeSelect: document.getElementById('themeSelect'),
   apiKeyInput: document.getElementById('apiKeyInput'),
   toggleVisibility: document.getElementById('toggleVisibility'),
   bannerToggle: document.getElementById('bannerToggle'),
@@ -10,29 +8,6 @@ const el = {
   testBtn: document.getElementById('testBtn'),
   statusMsg: document.getElementById('statusMsg')
 };
-
-let isDarkMode = true;
-
-// Theme Switcher
-function setTheme(theme) {
-  isDarkMode = theme === 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  if (el.themeToggleBtn) el.themeToggleBtn.textContent = isDarkMode ? '🌙' : '☀️';
-  if (el.themeSelect) el.themeSelect.value = theme;
-  chrome.storage.sync.set({ theme });
-}
-
-if (el.themeToggleBtn) {
-  el.themeToggleBtn.addEventListener('click', () => {
-    setTheme(isDarkMode ? 'light' : 'dark');
-  });
-}
-
-if (el.themeSelect) {
-  el.themeSelect.addEventListener('change', (e) => {
-    setTheme(e.target.value);
-  });
-}
 
 // Show/Hide Key Toggle
 let isKeyVisible = false;
@@ -55,9 +30,7 @@ function showStatus(text, isError = false) {
 
 // Load saved settings
 async function loadSettings() {
-  const sync = await chrome.storage.sync.get(['groqApiKey', 'geminiApiKey', 'theme', 'showBanner']);
-
-  if (sync.theme) setTheme(sync.theme);
+  const sync = await chrome.storage.sync.get(['groqApiKey', 'geminiApiKey', 'showBanner']);
 
   const key = sync.groqApiKey || sync.geminiApiKey || '';
   if (el.apiKeyInput) el.apiKeyInput.value = key;
