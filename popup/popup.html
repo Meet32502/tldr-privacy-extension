@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TL;DR Privacy — Series A Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- Ambient Texture -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-mark" style="background: linear-gradient(135deg, #6366F1, #4F46E5); color: white; font-weight: 800; font-size: 14px;">🛡️</div>
+      <div class="hdr-info">
+        <div class="hdr-title-row">
+          <span class="hdr-name">TL;DR</span>
+          <span class="hdr-badge">SERIES A</span>
+        </div>
+        <span id="headerDomain" class="hdr-domain">domain.com</span>
+      </div>
+    </div>
+    <div class="hdr-nav">
+      <button id="themeToggleBtn" class="hdr-btn" title="Toggle Light/Dark Theme">🌙</button>
+      <button id="historyBtn" class="hdr-btn" title="Recent Privacy Checks (History)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </button>
+      <button id="settingsBtn" class="hdr-btn" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- SCREEN 1: NO API KEY -->
+  <main id="screenNoKey" class="screen hidden">
+    <div class="empty-state">
+      <div class="empty-glyph">🔑</div>
+      <h2 class="empty-title">Groq API Key Required</h2>
+      <p class="empty-sub">Add your free Groq API key to unlock lightning-fast legal text summarization.</p>
+      <button id="goToSettingsBtn" class="btn btn-accent">Configure Settings</button>
+    </div>
+  </main>
+
+  <!-- SCREEN 2: LAUNCHER (MAIN) -->
+  <main id="screenLauncher" class="screen">
+    <!-- Detect Strip -->
+    <div id="detectStrip" class="detect-strip hidden">
+      <div class="detect-signal">
+        <div class="signal-pip"></div>
+        <div class="signal-pip"></div>
+        <div class="signal-pip"></div>
+      </div>
+      <div class="detect-info">
+        <span id="detectLabel" class="detect-label">Privacy Policy Detected</span>
+        <span id="detectSub" class="detect-sub">Click below to open the Privacy Slider</span>
+      </div>
+    </div>
+
+    <!-- Cached Score Preview -->
+    <div id="cachedPreview" class="ret-score-row hidden">
+      <div class="ret-meta">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2px;">
+          <span id="cachedDomain" class="ret-domain">domain.com</span>
+          <span id="cachedGrade" class="ret-grade grade-good">Score 82</span>
+        </div>
+        <span id="cachedTime" class="ret-time">Analyzed recently</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button id="openSliderBtn" class="btn btn-accent">
+        ⚡ Open Privacy Slider
+      </button>
+      <button id="reanalyzeBtn" class="btn btn-muted hidden">
+        🔄 Re-analyze Page
+      </button>
+    </div>
+
+    <p class="idle-hint">
+      The slider slides in on your webpage with 5 privacy category breakdown cards!
+    </p>
+  </main>
+
+  <!-- SCREEN 3: HISTORY -->
+  <main id="screenHistory" class="screen hidden">
+    <div class="hist-header">
+      <button id="histBackBtn" class="hist-back" title="Back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <span class="hist-title">RECENT PRIVACY CHECKS</span>
+    </div>
+
+    <div id="histList" class="hist-list"></div>
+
+    <div id="histEmpty" class="empty-state hidden">
+      <div class="empty-glyph">📑</div>
+      <h2 class="empty-title">No history yet</h2>
+      <p class="empty-sub">Analyzed policies will appear here.</p>
+    </div>
+
+    <div id="histFooter" class="hist-footer hidden">
+      <button id="clearAllBtn" class="btn btn-ghost" style="color: var(--risk-high);">
+        🗑️ Clear all history
+      </button>
+    </div>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

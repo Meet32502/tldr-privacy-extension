@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TL;DR Privacy — Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+
+  <!-- Background Orbs & Grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <div class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+      <div class="logo">
+        <div class="logo-mark">🛡️</div>
+        <div>
+          <div class="title-row">
+            <h1 class="logo-title">TL;DR Privacy</h1>
+            <span class="version-tag">SERIES A</span>
+          </div>
+          <p class="logo-sub">Settings & Preferences</p>
+        </div>
+      </div>
+      <button id="themeToggleBtn" class="hdr-btn" title="Toggle Theme">🌙</button>
+    </header>
+
+    <main>
+
+      <!-- Section 1: Groq API Key -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-icon">🔑</div>
+          <div>
+            <h2 class="card-title">Groq AI API Key</h2>
+            <p class="card-desc">Required to analyze Terms of Service & Privacy Policies with ultra-fast AI</p>
+          </div>
+        </div>
+
+        <div class="get-key-banner">
+          <div class="banner-content">
+            <span class="banner-sparkle">✨</span>
+            <div>
+              <strong>Get a Free Groq API Key</strong>
+              <p>Groq offers instant, high-speed LLM inference with a generous free tier.</p>
+            </div>
+          </div>
+          <a href="https://console.groq.com/keys" target="_blank" class="btn btn-outline">
+            Get Free Key →
+          </a>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="apiKeyInput">Your Groq API Key</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="apiKeyInput"
+              class="form-input"
+              placeholder="gsk_..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="toggle-visibility" id="toggleVisibility" title="Show/hide key">
+              <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <p class="form-hint">
+            🔒 Stored locally in your browser — never sent to any server except Groq Cloud directly.
+          </p>
+        </div>
+
+        <div class="action-row">
+          <button class="btn btn-secondary" id="testBtn">
+            ⚡ Test Connection
+          </button>
+          <button class="btn btn-primary" id="saveBtn">
+            Save API Key
+          </button>
+        </div>
+
+        <div class="status-msg hidden" id="statusMsg"></div>
+      </section>
+
+      <!-- Section 2: Extension Preferences -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-icon">⚙️</div>
+          <div>
+            <h2 class="card-title">Extension Preferences</h2>
+            <p class="card-desc">Customize theme and in-page display settings</p>
+          </div>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <strong class="pref-title">Theme Mode</strong>
+            <p class="pref-desc">Choose between Dark and Light appearance</p>
+          </div>
+          <select id="themeSelect" class="pref-select">
+            <option value="dark">Dark Mode</option>
+            <option value="light">Light Mode</option>
+          </select>
+        </div>
+
+        <div class="pref-row">
+          <div>
+            <strong class="pref-title">In-Page Smart Banner</strong>
+            <p class="pref-desc">Show a small top-right notification banner when a legal page is detected</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="bannerToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Section 3: Architecture & Security -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-icon">🛡️</div>
+          <div>
+            <h2 class="card-title">Privacy & Security Engine</h2>
+            <p class="card-desc">Built for maximum consumer safety</p>
+          </div>
+        </div>
+
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-icon">🔒</div>
+            <div class="step-body">
+              <strong>100% Client-Side Processing</strong>
+              <p>Your API key and decoded summaries are saved directly to chrome.storage.local.</p>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-icon">⚡</div>
+            <div class="step-body">
+              <strong>Groq Llama-3 70B & 120B AI</strong>
+              <p>Delivers structured 5-category privacy signal breakdowns in under 1 second.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
