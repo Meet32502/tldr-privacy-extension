@@ -1,7 +1,7 @@
 # Product Requirement Document (PRD)
 
 ## 📌 Project Name: TL;DR Privacy — AI ToS & Privacy Policy Summarizer
-**Document Version:** 1.0.0  
+**Document Version:** 2.0.0  
 **Status:** Approved & Implemented  
 **Target Platform:** Google Chrome & Microsoft Edge (Manifest V3)  
 
@@ -19,105 +19,111 @@ Tech companies and digital platforms constantly update their Terms of Service (T
   - Authorizing data selling to third-party ad networks without explicit opt-in.
 
 ### 1.2 The Solution
-**TL;DR Privacy** is a lightweight, privacy-focused browser extension that instantly scrapes ToS and Privacy Policy documents from any webpage, executes AI-driven legal analysis via LLM APIs, and returns a concise, color-coded risk assessment and privacy rating (0–100) within 3 seconds.
+**TL;DR Privacy** is a lightweight, privacy-focused browser extension that instantly extracts ToS and Privacy Policy text, executes deterministic AI-driven legal analysis via ultra-fast LLM APIs (Groq Cloud), and delivers an interactive in-page sliding panel, 3-bullet executive summary, 5 category risk pillars, and a color-coded risk rating (0–100) in under 3 seconds.
 
 ---
 
 ## 2. Product Goals & Target Audience
 
 ### 2.1 Goals
-- **Empower Users:** Turn 50-page legal documents into a 5-second readable summary.
-- **Zero Friction:** Automatic detection of legal pages with single-click analysis.
-- **Privacy First:** Client-side execution with API keys stored securely in local browser storage; zero intermediary telemetry.
-- **High Performance:** Response time under 3 seconds using high-speed LLMs (`openai/gpt-oss-120b` / Groq API).
+- **Empower Users:** Turn 50-page legal documents into 3 concise, plain-language bullet points.
+- **Zero Friction:** Automatic legal page detection with floating top banner and side pill trigger.
+- **Deterministic Risk Scoring:** Consistent, reproducible risk scores (temperature = 0) based on mathematical clause deductions.
+- **Privacy First:** Client-side execution with API keys stored locally (`chrome.storage.sync`); zero telemetry servers.
+- **High Performance:** Response time under 3 seconds using Groq API (`openai/gpt-oss-120b`).
 
 ### 2.2 Target Audience
 - **General Web Users:** Everyday internet users seeking quick risk awareness before creating accounts.
 - **Privacy Enthusiasts & Advocates:** Users concerned with data sovereignty, AI training opt-outs, and tracking.
-- **Hackathon Judges & Technical Reviewers:** Audience looking for a functional, slick, and scalable browser extension solution.
+- **Developers & Reviewers:** Audience looking for a functional, polished, Manifest V3 Chrome extension solution.
 
 ---
 
 ## 3. Key User Flows & Feature Specifications
 
-### 3.1 Automatic Legal Page Detection
-- **Requirement:** Content script scans page metadata (title, URL, header DOM elements) for privacy-related keywords (`terms of service`, `privacy policy`, `user agreement`, `terms of use`).
-- **Behavior:** Extension popup displays an active green status badge (`✓ Privacy/ToS page detected`) when on a legal page.
+### 3.1 Automatic Legal Page Detection & Smart Banner
+- **Detection:** Content script inspects metadata, document URL, title, and body keywords (`terms of service`, `privacy policy`, `user agreement`, `cookie policy`).
+- **Floating Top Banner:** Unobtrusive banner appears at the top-right of legal pages offering one-click slider open.
+- **Floating Side Pill Trigger:** Sleek edge trigger (`#tldr-pill`) attached to the page margin for quick toggling.
 
-### 3.2 Automated Document Scraping & Cleaning
-- **Requirement:** Extract core document body text while removing DOM clutter (navbars, footers, ad banners, scripts, styling tags).
-- **Truncation Guard:** Cap text at ~15,000 characters to optimize LLM context window utilization and speed up processing.
+### 3.2 Automated Document Scraping & Sanitization
+- **DOM Cleaning:** Removes scripts, stylesheets, iframe noise, cookie popups, footers, and ad banners.
+- **Truncation Guard:** Capped at 15,000 characters to optimize LLM processing speed and context window utilization.
 
-### 3.3 AI Analysis & Risk Rating
-- **Requirement:** Send sanitized text to OpenAI-compatible LLM endpoint using structured JSON mode.
-- **Risk Assessment Schema:**
-  - **Privacy Score:** Rating from 0 (Extremely Invasive) to 100 (User-Friendly).
-  - **Overall Verdict:** 1-sentence executive summary.
-  - **Clause Breakdown:** 5 to 8 specific clauses classified into 3 risk levels:
-    - 🔴 **High Risk / Dangerous:** AI training on user data, data selling, mandatory arbitration, location tracking.
-    - 🟡 **Medium Risk / Caution:** Changes to terms without notification, third-party analytics sharing.
-    - 🟢 **Low Risk / Safe:** Clear data deletion rights, strong opt-out policies, end-to-end encryption.
+### 3.3 AI Analysis, Deterministic Scoring & 3-Bullet Summary
+- **Deterministic LLM Inference:** Calls Groq API with `temperature: 0.0` for identical results on re-analyzing the same document.
+- **Strict 3-Bullet Summary:** Prompt and code normalization strictly cap the executive summary at **exactly 3 short bullets** (under 15–20 words each).
+- **Mathematical Score Calculation:** 
+  - Starts at 100 points (User-Friendly).
+  - Deducts 15 points per high-risk clause, 8 points per medium-risk clause, 0 for low-risk.
+  - Clamped between 0 and 100.
+  - Categorized into 4 rating tiers: 🔴 High Risk (0–30), 🟡 Moderate Risk (31–55), 🔵 Fair (56–75), 🟢 User-Friendly (76–100).
 
-### 3.4 Interactive Dark Glassmorphism UI
-- **Requirement:** Modern, high-aesthetic popup interface built with Vanilla HTML/CSS/JS.
-- **Components:**
-  - Animated SVG Privacy Score Ring with dynamic HSL color transitions.
-  - Staggered animation cards for risk clauses.
-  - One-click copy summary button for sharing.
-  - Restricted page guard (`chrome://`, `edge://`) to prevent invalid script execution errors.
+### 3.4 5 Privacy Category Pillars
+Findings are categorized into 5 core privacy domains:
+1. 📦 **Data Selling & Monetization**
+2. 🧠 **AI Model Training on User Data**
+3. 🔗 **Third-Party Data Sharing**
+4. ⏳ **Data Retention & Account Deletion**
+5. ⚖️ **User Rights & Mandatory Arbitration**
 
-### 3.5 Secure Key Management (Options Page)
-- **Requirement:** Dedicated Chrome Options page for entering, saving, and testing API keys.
-- **Storage:** Key stored in `chrome.storage.sync` (encrypted local profile storage).
-- **Connection Tester:** Real-time API ping test with status indicator before saving key.
+### 3.5 In-Page Shadow DOM Slider & Popup Launcher
+- **Shadow DOM Isolation:** Slider panel renders inside an isolated Shadow DOM (`#tldr-privacy-root`) to prevent CSS leakage or page layout distortion.
+- **Porcelain Light Theme UI:** Modern design system built with clean porcelain light aesthetic (`#F8FAFC` background, `#FFFFFF` cards, `#0F172A` text, `#4F46E5` brand primary).
+- **Typography Stack:** High-legibility Google Fonts (*Plus Jakarta Sans*, *Outfit*, *JetBrains Mono*). Bullet summary text styled at `12.5px`, medium weight (`500`), `1.45` line-height for visual balance next to the score ring.
+- **Analysis History:** Saves past checks in `chrome.storage.local` with a dedicated History view in the extension popup.
+
+### 3.6 Options Page & Key Management
+- **Groq API Key Setup:** Options page to input, validate, test, and save free Groq API keys (`gsk_...`).
+- **Storage:** Key saved locally in `chrome.storage.sync`.
 
 ---
 
 ## 4. Technical Architecture & Tech Stack
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  BROWSER TAB (ToS / Privacy Policy Webpage)         │
-│   └── content.js (DOM Scraper & Text Cleaner)        │
-└──────────────────────────┬──────────────────────────┘
-                           │ chrome.runtime.sendMessage
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│  EXTENSION POPUP (popup.html / popup.js / popup.css) │
-│   └── Dark Glassmorphic UI & Animated Score Ring    │
-└──────────────────────────┬──────────────────────────┘
-                           │ chrome.runtime.sendMessage
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│  BACKGROUND SERVICE WORKER (background.js)          │
-│   └── Direct fetch call with Bearer Token           │
-└──────────────────────────┬──────────────────────────┘
-                           │ HTTPS POST (JSON format)
-                           ▼
-┌─────────────────────────────────────────────────────┐
-│  LLM API (OpenAI-compatible / Groq API)             │
-│   └── Model: openai/gpt-oss-120b                    │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  BROWSER TAB (ToS / Privacy Policy Webpage)                     │
+│   ├── content.js (DOM Scraper & Text Cleaner)                   │
+│   └── Shadow DOM Sliding Panel & Floating Banner/Pill           │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │ chrome.runtime.sendMessage
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  EXTENSION POPUP (popup.html / popup.js / popup.css)             │
+│   └── Launcher, Cached Score Display & History Viewer           │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │ chrome.runtime.sendMessage
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  BACKGROUND SERVICE WORKER (background.js)                      │
+│   └── Deterministic Groq API fetch (temp: 0.0, max 3 bullets)  │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │ HTTPS POST (JSON format)
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  GROQ CLOUD LLM API                                             │
+│   └── Model: openai/gpt-oss-120b                                │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Tech Stack Table
 
 | Component | Technology | Rationale |
 |---|---|---|
-| **Extension Standard** | Manifest V3 | Mandated by Chrome & Edge; enhanced security & performance |
+| **Extension Standard** | Manifest V3 | Standard for Chrome & Edge extensions |
 | **Logic & Scripting** | ES6+ JavaScript | Zero external runtime dependencies; lightweight bundle |
-| **UI Styling** | Custom Vanilla CSS | Maximum flexibility, glassmorphism gradients, zero CSS overhead |
-| **LLM Provider** | Groq / OpenAI-compatible API | Sub-second latency; support for `openai/gpt-oss-120b` |
-| **Storage API** | `chrome.storage.sync` | Automatic cross-device profile syncing & encryption |
+| **UI System & Theme** | Vanilla CSS (Porcelain Light Mode) | Clean palette (`#F8FAFC`), Plus Jakarta Sans typography, shadow DOM isolation |
+| **AI LLM Engine** | Groq Cloud API (`openai/gpt-oss-120b`) | Ultra-fast inference with deterministic scoring (`temp: 0.0`) |
+| **Storage API** | `chrome.storage.sync` & `chrome.storage.local` | Secure key storage and local analysis history caching |
 
 ---
 
 ## 5. Security, Privacy & Data Handling
 
-1. **No Intermediary Backend:** Extension communicates directly from browser to LLM provider; no third-party logging servers.
-2. **Local Key Storage:** API key resides exclusively in user's browser storage (`chrome.storage.sync`).
-3. **On-Demand Scrape Execution:** Content script executes only when user opens extension popup and clicks "Analyze".
-4. **Data Sanitization:** DOM script strips scripts, cookies, and tokens before sending text payloads.
+1. **Direct Communication:** Browser communicates directly with Groq API; no intermediate data collection backend.
+2. **Local Key Storage:** API key stored exclusively in browser storage (`chrome.storage.sync`).
+3. **DOM Text Sanitization:** Strips scripts, tracking pixels, cookies, and tokens prior to AI transmission.
 
 ---
 
@@ -126,35 +132,27 @@ Tech companies and digital platforms constantly update their Terms of Service (T
 ```
 tldr-privacy-extension/
 ├── manifest.json          # Chrome MV3 metadata & permissions
-├── background.js          # Service worker for LLM API calls
-├── content.js             # Page text extraction & DOM cleaner
-├── PRD.md                 # Product Requirement Document
-├── README.md              # Installation & setup guide
+├── background.js          # Service worker & Groq AI API handler
+├── content.js             # Text scraper & Shadow DOM sliding panel
+├── PRD.md                 # Product Requirement Document (v2.0.0)
+├── README.md              # Installation & user guide
 ├── popup/
-│   ├── popup.html         # Main popup HTML layout (5 screen states)
-│   ├── popup.css          # Glassmorphism dark design system
-│   └── popup.js           # Popup controller & score animations
+│   ├── design-tokens.css  # Porcelain Light Mode design system
+│   ├── popup.html         # Extension launcher & history UI
+│   ├── popup.css          # Launcher stylesheet
+│   └── popup.js           # Launcher controller & history loader
 ├── options/
-│   ├── options.html       # Options/Settings page
-│   ├── options.css        # Options styling
-│   └── options.js         # API key save, load & test handler
+│   ├── options.html       # API key settings page
+│   ├── options.css        # Options page styling
+│   └── options.js         # API key saving, loading & ping tester
 └── icons/
-    ├── icon16.png         # Toolbar icon 16x16
-    ├── icon48.png         # Management icon 48x48
-    └── icon128.png        # Web Store icon 128x128
+    ├── icon16.png         # Toolbar icon
+    ├── icon48.png         # Extension management icon
+    └── icon128.png        # Web Store icon
 ```
 
 ---
 
-## 7. Future Scope & Roadmap (Post-Hackathon)
-
-1. **Auto-Highlights on Webpage:** Highlight dangerous clauses directly inside the webpage DOM with tooltip warnings.
-2. **Browser Push Notifications:** Alert user when a site updates its ToS policy.
-3. **Policy Comparison Engine:** Compare previous ToS version vs. updated version to highlight newly added invasive clauses.
-4. **Multi-LLM Provider Dropdown:** Allow user to switch between Groq, OpenAI, Anthropic Claude, and local Ollama instances.
-
----
-
-## 8. License & Author
+## 7. License & Author
 - **License:** MIT License  
-- **Project:** Hackathon Submission — TL;DR Privacy Extension
+- **Project:** TL;DR Privacy Extension

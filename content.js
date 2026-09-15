@@ -9,8 +9,27 @@
   // ===== TEXT EXTRACTION UTILITIES =====
   function extractPageText() {
     const docClone = document.cloneNode(true);
+
+    // Extract text from same-origin legal iframes before removing noise
+    try {
+      docClone.querySelectorAll('iframe').forEach(iframe => {
+        try {
+          const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (iframeDoc && iframeDoc.body && (iframeDoc.body.innerText || '').trim().length > 200) {
+            const iframeDiv = document.createElement('div');
+            iframeDiv.innerText = iframeDoc.body.innerText;
+            if (iframe.parentNode) iframe.parentNode.replaceChild(iframeDiv, iframe);
+          } else {
+            iframe.remove();
+          }
+        } catch (e) {
+          iframe.remove();
+        }
+      });
+    } catch (e) {}
+
     const noiseSelectors = [
-      'script', 'style', 'noscript', 'iframe',
+      'script', 'style', 'noscript',
       'nav', 'header', 'footer',
       '.cookie-banner', '.cookie-notice', '#cookie-consent',
       '.advertisement', '.ad', '.ads',
@@ -27,20 +46,31 @@
     const contentSelectors = [
       'main', 'article', '[role="main"]',
       '.terms-content', '.privacy-content', '.legal-content', '.policy-content',
-      '#terms', '#privacy', '#main-content', '.content', '#content'
+      '.terms-body', '.policy-body', '.legal-body', '.terms-wrapper', '.legal-wrapper',
+      '#terms', '#privacy', '#main-content', '#legal', '.content', '#content', '.container'
     ];
 
-    let mainContent = null;
+    let bestEl = null;
+    let maxLen = 0;
     for (const selector of contentSelectors) {
-      const el = docClone.querySelector(selector);
-      if (el && el.innerText && el.innerText.trim().length > 500) {
-        mainContent = el;
-        break;
-      }
+      const els = docClone.querySelectorAll(selector);
+      els.forEach(el => {
+        const textLen = (el.innerText || '').trim().length;
+        if (textLen > maxLen) {
+          maxLen = textLen;
+          bestEl = el;
+        }
+      });
     }
 
-    const textSource = mainContent || docClone.body;
-    let text = textSource.innerText || textSource.textContent || '';
+    const fullBodyText = (docClone.body ? docClone.body.innerText || '' : '').trim();
+    let textSource = docClone.body;
+
+    if (bestEl && maxLen >= 800 && maxLen >= fullBodyText.length * 0.3) {
+      textSource = bestEl;
+    }
+
+    let text = textSource ? (textSource.innerText || textSource.textContent || '') : '';
 
     text = text
       .replace(/\t/g, ' ')
@@ -48,7 +78,7 @@
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    const MAX_CHARS = 15000;
+    const MAX_CHARS = 18000;
     if (text.length > MAX_CHARS) {
       text = text.substring(0, MAX_CHARS) + '\n\n[... document truncated for analysis ...]';
     }
@@ -62,13 +92,33 @@
   }
 
   function isPrivacyPage() {
+    const url = window.location.href.toLowerCase();
+    const title = document.title.toLowerCase();
+
+    // 1. Check URL patterns (including hyphens and subpaths)
+    const urlRegex = /\b(terms|privacy|policy|policies|legal|disclaimer|agreement|conditions|rules|compliance|risk|disclosure)\b/i;
+    if (urlRegex.test(url) || url.includes('terms-conditions') || url.includes('terms-of-service') || url.includes('privacy-policy') || url.includes('user-agreement') || url.includes('risk-disclosure')) {
+      return true;
+    }
+
+    // 2. Check title indicators
     const indicators = [
-      'terms of service', 'terms and conditions', 'privacy policy',
-      'terms of use', 'user agreement', 'end user license',
-      'cookie policy', 'data policy', 'legal notice', 'privacy notice'
+      'terms', 'privacy', 'policy', 'legal', 'disclaimer', 'risk disclosure',
+      'user agreement', 'client agreement', 'terms of service', 'terms & conditions',
+      'terms and conditions', 'terms of use', 'cookie policy', 'privacy notice',
+      'code of conduct', 'byelaws', 'rules & regulations', 'rules and regulations'
     ];
-    const pageText = (document.title + ' ' + window.location.href + ' ' + document.body.innerText.substring(0, 2000)).toLowerCase();
-    return indicators.some(indicator => pageText.includes(indicator));
+    if (indicators.some(ind => title.includes(ind))) return true;
+
+    // 3. Check page headings (h1, h2)
+    try {
+      const headings = Array.from(document.querySelectorAll('h1, h2')).map(h => (h.innerText || '').toLowerCase()).join(' ');
+      if (indicators.some(ind => headings.includes(ind))) return true;
+    } catch (e) {}
+
+    // 4. Check body text snippet (first 4000 characters)
+    const bodySnippet = (document.body ? document.body.innerText.substring(0, 4000) : '').toLowerCase();
+    return indicators.some(indicator => bodySnippet.includes(indicator));
   }
 
   function getDomain(url) {

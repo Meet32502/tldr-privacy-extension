@@ -205,7 +205,7 @@ async function showHistory() {
     if (el.histFooter) el.histFooter.classList.add('hidden');
   } else {
     if (el.histEmpty) el.histEmpty.classList.add('hidden');
-    if (el.histList) el.histList.remove('hidden');
+    if (el.histList) el.histList.classList.remove('hidden');
     if (el.histFooter) el.histFooter.classList.remove('hidden');
 
     entries.forEach((entry) => {

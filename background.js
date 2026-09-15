@@ -43,21 +43,23 @@ function normalizeVerdict(verdictRaw) {
  * Builds the prompt messages for Groq API
  */
 function buildMessages(tosText, pageTitle, pageUrl) {
-  const systemPrompt = `You are an expert privacy lawyer and consumer rights advocate. Your job is to analyze Terms of Service and Privacy Policy documents and identify the most important clauses that affect users.
+  const systemPrompt = `You are an expert privacy lawyer, consumer rights advocate, and financial legal analyst. Your job is to analyze Terms of Service, Privacy Policies, and Legal Agreements (including financial, trading, demat, brokerage, client agreements, risk disclosures, and EULAs) and identify the most important clauses affecting users.
 
 CRITICAL INSTRUCTION:
-First, check if the provided document text is actually a Terms of Service, Privacy Policy, End User License Agreement (EULA), Cookie Policy, or legal terms agreement document.
+First, check if the provided document text is a Terms of Service, Privacy Policy, End User License Agreement (EULA), Cookie Policy, Risk Disclosure Document, Trading & Demat Account Terms, Client Agreement, Disclaimer, or legal terms/conditions document.
 
-If the provided text is NOT a Terms of Service, Privacy Policy, or legal agreement document (for example: it is a general website home page, news article, e-commerce product page, search results, blog post, or non-legal content), return ONLY this JSON structure:
+Even if the document is a specialized financial, trading, or stock broking legal agreement (such as Dhan, Zerodha, Groww, or banking terms), treat it as a valid legal document ("isLegalDocument": true) and analyze its privacy, risk, data handling, and user rights clauses.
+
+If the provided text is NOT a legal document at all (for example: a standard marketing homepage with no terms, news article, blog post, or product search result), return ONLY this JSON structure:
 {
   "isLegalDocument": false,
   "verdict": ["This page does not contain a Terms of Service or Privacy Policy document."]
 }
 
-If the text IS a legal document, set "isLegalDocument": true and return:
+If the text IS a legal document or contains legal/privacy/trading terms, set "isLegalDocument": true and return:
 {
   "isLegalDocument": true,
-  "score": <integer 0-100, where 0=extremely privacy-invasive, 100=very user-friendly>,
+  "score": <integer 0-100, where 0=extremely privacy-invasive/high risk, 100=very user-friendly>,
   "verdict": [
     "<concise bullet point 1, max 15 words>",
     "<concise bullet point 2, max 15 words>",
@@ -75,12 +77,12 @@ If the text IS a legal document, set "isLegalDocument": true and return:
 STRICT SUMMARY & SCORING RULES:
 - "verdict": Return EXACTLY 3 concise bullet points. No more, no less, no sub-explanations. Each bullet must be short and under 15 words.
 - Calculate score deterministically starting from 100 points: deduct 15 points per high-risk clause, deduct 8 points per medium-risk clause, deduct 0 for low-risk clauses. Clamp final score between 0 and 100.
-- Score 0-30: Red zone (dangerous to privacy)
+- Score 0-30: Red zone (dangerous to privacy/high risk)
 - Score 31-55: Yellow zone (concerning, mixed)
 - Score 56-75: Blue zone (fair terms)
 - Score 76-100: Green zone (user-friendly)
-- Include 5 to 8 clauses, ordered from most dangerous to least
-- Focus on: data collection, data selling, AI training on user data, account deletion, arbitration clauses, data retention, third-party sharing, location tracking, right to change terms without notice
+- Include 5 to 8 clauses, ordered from most critical to least
+- Focus on: data collection, data selling, AI training on user data, account deletion/closure fees, mandatory arbitration, data retention, third-party sharing, financial/location tracking, right to change terms without notice, liability waivers
 - Use plain English, not legal jargon`;
 
   const userPrompt = `Analyze the following document text from "${pageTitle}" (${pageUrl}):
