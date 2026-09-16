@@ -22,7 +22,6 @@ const el = {
   cachedTime: document.getElementById('cachedTime'),
 
   openSliderBtn: document.getElementById('openSliderBtn'),
-  reanalyzeBtn: document.getElementById('reanalyzeBtn'),
 
   histBackBtn: document.getElementById('histBackBtn'),
   histList: document.getElementById('histList'),
@@ -94,7 +93,6 @@ async function init() {
     if (el.detectStrip) el.detectStrip.classList.add('hidden');
     if (el.cachedPreview) el.cachedPreview.classList.add('hidden');
     if (el.openSliderBtn) el.openSliderBtn.disabled = true;
-    if (el.reanalyzeBtn) el.reanalyzeBtn.classList.add('hidden');
     showScreen('launcher');
     return;
   }
@@ -121,10 +119,8 @@ async function init() {
     }
 
     if (el.openSliderBtn) el.openSliderBtn.innerHTML = '⚡ Open Privacy Slider';
-    if (el.reanalyzeBtn) el.reanalyzeBtn.classList.remove('hidden');
   } else {
     if (el.cachedPreview) el.cachedPreview.classList.add('hidden');
-    if (el.reanalyzeBtn) el.reanalyzeBtn.classList.add('hidden');
 
     try {
       const check = await chrome.tabs.sendMessage(tab.id, { action: 'CHECK_PAGE' });
@@ -168,25 +164,6 @@ async function handleOpenSlider() {
       action: 'TOGGLE_SLIDER',
       forceOpen: true,
       startAnalysis: !saved
-    });
-  }
-  window.close();
-}
-
-async function handleReanalyze() {
-  if (!currentTab) return;
-  try {
-    await chrome.tabs.sendMessage(currentTab.id, {
-      action: 'TOGGLE_SLIDER',
-      forceOpen: true,
-      startAnalysis: true
-    });
-  } catch (e) {
-    await chrome.scripting.executeScript({ target: { tabId: currentTab.id }, files: ['content.js'] });
-    await chrome.tabs.sendMessage(currentTab.id, {
-      action: 'TOGGLE_SLIDER',
-      forceOpen: true,
-      startAnalysis: true
     });
   }
   window.close();
@@ -240,7 +217,6 @@ async function showHistory() {
 
 // Event Listeners
 if (el.openSliderBtn) el.openSliderBtn.addEventListener('click', handleOpenSlider);
-if (el.reanalyzeBtn) el.reanalyzeBtn.addEventListener('click', handleReanalyze);
 if (el.settingsBtn) el.settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
 if (el.goToSettingsBtn) el.goToSettingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
 

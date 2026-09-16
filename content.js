@@ -561,11 +561,6 @@
             </button>
           </div>
           <div id="findingsContainer"></div>
-
-          <!-- Actions -->
-          <div class="footer-row">
-            <button id="reanalyzeSliderBtn" class="btn btn-muted">🔄 Re-analyze</button>
-          </div>
         </div>
 
         <!-- Error Screen -->
@@ -616,7 +611,6 @@
 
   const copySummaryBtn = shadow.getElementById('copySummaryBtn');
   const copyLabel = shadow.getElementById('copyLabel');
-  const reanalyzeSliderBtn = shadow.getElementById('reanalyzeSliderBtn');
   const errorText = shadow.getElementById('errorText');
   const retrySliderBtn = shadow.getElementById('retrySliderBtn');
 
@@ -931,7 +925,6 @@
   bannerCloseBtn?.addEventListener('click', () => { bannerEl.classList.remove('visible'); });
 
   startAnalyzeBtn.addEventListener('click', () => runAnalysis(false));
-  reanalyzeSliderBtn.addEventListener('click', () => runAnalysis(true));
   retrySliderBtn.addEventListener('click', () => runAnalysis(true));
   copySummaryBtn.addEventListener('click', copySummary);
 
